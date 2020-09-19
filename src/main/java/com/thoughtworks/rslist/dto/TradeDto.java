@@ -31,4 +31,10 @@ public class TradeDto {
   @ManyToOne
   @JoinColumn(name = "rsEventDto_id")
   private RsEventDto rsEventDto;
+
+  public TradeDto(int amount, int rank, RsEventDto rsEventDto) {
+    this.amount = amount;
+    this.rank = rank;
+    this.rsEventDto = rsEventDto;
+  }
 }

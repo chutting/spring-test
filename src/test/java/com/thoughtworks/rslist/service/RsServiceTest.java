@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
@@ -123,7 +124,7 @@ class RsServiceTest {
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
     when(tradeRepository.findAllByRank(anyInt())).thenReturn(new ArrayList<>());
 
-    rsService.buy(new Trade(1, 100, 1, rsEventDto), 1);
+    rsService.buy(new Trade(1, 100, 1), 1);
 
     verify(tradeRepository).save(TradeDto
         .builder()
@@ -166,20 +167,72 @@ class RsServiceTest {
     TradeDto tradeDto = TradeDto.builder()
         .rank(1)
         .amount(1000)
-        .id(1)
         .rsEventDto(rsEventDto)
         .build();
 
-    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
+    when(rsEventRepository.findById(1)).thenReturn(Optional.of(rsEventDto));
+    when(rsEventRepository.findById(2)).thenReturn(Optional.of(rsEventDtoClone));
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
     when(tradeRepository.findAllByRank(1)).thenReturn(Arrays.asList(tradeDto));
 
-    rsService.buy(new Trade(100, 1, rsEventDtoClone), 1);
+    rsService.buy(new Trade(100, 1), 2);
 
     verify(tradeRepository, times(0)).save(TradeDto
         .builder()
         .rank(1)
         .amount(100)
+        .rsEventDto(rsEventDtoClone)
+        .build());
+  }
+
+  @Test
+  void shouldSuccessWhenAmountLargeEnough() {
+    UserDto userDto =
+        UserDto.builder()
+            .voteNum(5)
+            .phone("18888888888")
+            .gender("female")
+            .email("a@b.com")
+            .age(19)
+            .userName("xiaoli")
+            .id(2)
+            .build();
+    RsEventDto rsEventDto =
+        RsEventDto.builder()
+            .eventName("event name")
+            .id(1)
+            .keyword("keyword")
+            .voteNum(2)
+            .user(userDto)
+            .build();
+
+    RsEventDto rsEventDtoClone =
+        RsEventDto.builder()
+            .eventName("event name clone")
+            .id(2)
+            .keyword("keyword clone")
+            .voteNum(2)
+            .user(userDto)
+            .build();
+
+    TradeDto tradeDto = TradeDto.builder()
+        .rank(1)
+        .amount(100)
+        .id(1)
+        .rsEventDto(rsEventDto)
+        .build();
+
+    when(rsEventRepository.findById(1)).thenReturn(Optional.of(rsEventDto));
+    when(rsEventRepository.findById(2)).thenReturn(Optional.of(rsEventDtoClone));
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
+    when(tradeRepository.findAllByRank(1)).thenReturn(Arrays.asList(tradeDto));
+
+    rsService.buy(new Trade(1000, 1), 2);
+
+    verify(tradeRepository).save(TradeDto
+        .builder()
+        .rank(1)
+        .amount(1000)
         .rsEventDto(rsEventDtoClone)
         .build());
   }
