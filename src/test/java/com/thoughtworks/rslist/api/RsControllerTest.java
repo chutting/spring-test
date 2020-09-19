@@ -8,6 +8,7 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import com.thoughtworks.rslist.service.RsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ class RsControllerTest {
   @Autowired RsEventRepository rsEventRepository;
   @Autowired VoteRepository voteRepository;
   @Autowired TradeRepository tradeRepository;
+  @Autowired RsService rsService;
+
   private UserDto userDto;
 
   @BeforeEach
@@ -227,6 +230,31 @@ class RsControllerTest {
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
 
-    assertEquals("第一条事件", tradeRepository.findAll().get(0).getRsEventDto().getEventName());
+    assertEquals("第一条事件", rsService.findRsEventWithLargestAmountByRank(1).getEventName());
+  }
+
+  @Test
+  public void shouldSuccessWhenAmountLargeEnough() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+    RsEventDto rsEventDtoClone = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    rsEventDtoClone = rsEventRepository.save(rsEventDtoClone);
+
+    String tradeInfo = String.format("{\"amount\": %d, \"rank\": %d}", 1000, 1);
+
+    tradeRepository.save(TradeDto.builder()
+        .amount(100)
+        .rank(1)
+        .rsEventDto(rsEventDto)
+        .build());
+
+    mockMvc.perform(post(String.format("/rs/buy/%d", rsEventDtoClone.getId()))
+        .content(tradeInfo)
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk());
+
+    assertEquals("第二条事件", rsService.findRsEventWithLargestAmountByRank(1).getEventName());
   }
 }
