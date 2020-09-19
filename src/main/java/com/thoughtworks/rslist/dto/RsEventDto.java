@@ -17,7 +17,7 @@ import javax.persistence.Table;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "rsEvent")
+@Table(name = "research")
 public class RsEventDto {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private int id;
   private String eventName;

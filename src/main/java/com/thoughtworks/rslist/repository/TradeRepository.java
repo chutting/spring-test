@@ -11,4 +11,6 @@ import java.util.Optional;
 @Repository
 public interface TradeRepository extends CrudRepository<TradeDto, Integer> {
   List<TradeDto> findAllByRank(Integer rank);
+
+  List<TradeDto> findAll();
 }

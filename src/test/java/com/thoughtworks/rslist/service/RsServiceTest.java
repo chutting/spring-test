@@ -238,7 +238,7 @@ class RsServiceTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenRsEventIdNotExist() {
+  void shouldThrowExceptionWhenRsEventNotExist() {
     UserDto userDto =
         UserDto.builder()
             .voteNum(5)

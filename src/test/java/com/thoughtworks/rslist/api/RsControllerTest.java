@@ -4,6 +4,7 @@ import com.thoughtworks.rslist.dto.RsEventDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
+import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,6 +36,7 @@ class RsControllerTest {
   @Autowired UserRepository userRepository;
   @Autowired RsEventRepository rsEventRepository;
   @Autowired VoteRepository voteRepository;
+  @Autowired TradeRepository tradeRepository;
   private UserDto userDto;
 
   @BeforeEach
@@ -184,5 +186,21 @@ class RsControllerTest {
     List<VoteDto> voteDtos =  voteRepository.findAll();
     assertEquals(voteDtos.size(), 1);
     assertEquals(voteDtos.get(0).getNum(), 1);
+  }
+
+  @Test
+  public void shouldBuySuccessWhenWhenNoTrade() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+    rsEventDto = rsEventRepository.save(rsEventDto);
+
+    String tradeInfo = String.format("{\"amount\": %d, \"rank\": %d}", 100, 1);
+
+    mockMvc.perform(post(String.format("/rs/buy/%d", rsEventDto.getId()))
+        .content(tradeInfo)
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isOk());
+
+    assertEquals("第一条事件", tradeRepository.findAll().get(0).getRsEventDto().getEventName());
   }
 }
