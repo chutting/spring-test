@@ -1,6 +1,7 @@
 package com.thoughtworks.rslist.api;
 
 import com.thoughtworks.rslist.dto.RsEventDto;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -200,6 +201,31 @@ class RsControllerTest {
         .content(tradeInfo)
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk());
+
+    assertEquals("第一条事件", tradeRepository.findAll().get(0).getRsEventDto().getEventName());
+  }
+
+  @Test
+  public void shouldFailWhenAmountIsNotLargeEnough() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+    RsEventDto rsEventDtoClone = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).build();
+
+    rsEventDto = rsEventRepository.save(rsEventDto);
+    rsEventDtoClone = rsEventRepository.save(rsEventDtoClone);
+
+    String tradeInfo = String.format("{\"amount\": %d, \"rank\": %d}", 100, 1);
+
+    tradeRepository.save(TradeDto.builder()
+        .amount(1000)
+        .rank(1)
+        .rsEventDto(rsEventDto)
+        .build());
+
+    mockMvc.perform(post(String.format("/rs/buy/%d", rsEventDtoClone.getId()))
+        .content(tradeInfo)
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest());
 
     assertEquals("第一条事件", tradeRepository.findAll().get(0).getRsEventDto().getEventName());
   }
