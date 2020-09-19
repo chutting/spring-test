@@ -257,4 +257,19 @@ class RsControllerTest {
 
     assertEquals("第二条事件", rsService.findRsEventWithLargestAmountByRank(1).getEventName());
   }
+
+  @Test
+  public void shouldReturn400WhenRsEventNotExist() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).build();
+
+    rsEventRepository.save(rsEventDto);
+
+    String tradeInfo = String.format("{\"amount\": %d, \"rank\": %d}", 1000, 1);
+
+    mockMvc.perform(post("/rs/buy/2")
+        .content(tradeInfo)
+        .contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(status().isBadRequest());
+  }
 }

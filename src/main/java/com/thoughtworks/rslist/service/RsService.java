@@ -10,7 +10,9 @@ import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Comparator;
 import java.util.List;
@@ -74,7 +76,7 @@ public class RsService {
 
     Optional<RsEventDto> rsEventDtoOptional = rsEventRepository.findById(id);
     if (!rsEventDtoOptional.isPresent()) {
-      throw new RuntimeException();
+      return false;
     }
 
     RsEventDto rsEventDto = rsEventDtoOptional.get();

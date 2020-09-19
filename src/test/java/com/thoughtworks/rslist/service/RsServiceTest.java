@@ -197,6 +197,7 @@ class RsServiceTest {
             .userName("xiaoli")
             .id(2)
             .build();
+
     RsEventDto rsEventDto =
         RsEventDto.builder()
             .eventName("event name")
@@ -238,7 +239,7 @@ class RsServiceTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenRsEventNotExist() {
+  void shouldBuyFailWhenRsEventNotExist() {
     UserDto userDto =
         UserDto.builder()
             .voteNum(5)
@@ -259,13 +260,17 @@ class RsServiceTest {
             .user(userDto)
             .build();
 
+    TradeDto tradeDto = TradeDto.builder()
+        .rank(1)
+        .amount(1000)
+        .rsEventDto(rsEventDto)
+        .build();
+
     when(rsEventRepository.findById(anyInt())).thenReturn(Optional.empty());
     when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
 
-    assertThrows(
-        RuntimeException.class,
-        () -> {
-          rsService.buy(new Trade(1000, 1), 1);
-        });
+    rsService.buy(new Trade(1000, 1), 1);
+
+    verify(tradeRepository, times(0)).save(tradeDto);
   }
 }
