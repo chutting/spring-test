@@ -236,4 +236,36 @@ class RsServiceTest {
         .rsEventDto(rsEventDtoClone)
         .build());
   }
+
+  @Test
+  void shouldThrowExceptionWhenRsEventIdNotExist() {
+    UserDto userDto =
+        UserDto.builder()
+            .voteNum(5)
+            .phone("18888888888")
+            .gender("female")
+            .email("a@b.com")
+            .age(19)
+            .userName("xiaoli")
+            .id(2)
+            .build();
+
+    RsEventDto rsEventDto =
+        RsEventDto.builder()
+            .eventName("event name")
+            .id(1)
+            .keyword("keyword")
+            .voteNum(2)
+            .user(userDto)
+            .build();
+
+    when(rsEventRepository.findById(anyInt())).thenReturn(Optional.empty());
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
+
+    assertThrows(
+        RuntimeException.class,
+        () -> {
+          rsService.buy(new Trade(1000, 1), 1);
+        });
+  }
 }
