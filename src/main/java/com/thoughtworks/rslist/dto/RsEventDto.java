@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -18,7 +19,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Table(name = "rsEvent")
 public class RsEventDto {
-  @Id @GeneratedValue private int id;
+  @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private int id;
   private String eventName;
   private String keyword;
   private int voteNum;

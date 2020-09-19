@@ -9,6 +9,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -22,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 public class UserDto {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(name = "name")
     private String userName;
@@ -30,7 +31,9 @@ public class UserDto {
     private int age;
     private String email;
     private String phone;
-    private int voteNum =10;
+
+    @Builder.Default
+    private int voteNum = 10;
 
     @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user")
     private List<RsEventDto> rsEventDtos;

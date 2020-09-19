@@ -29,9 +29,15 @@ import java.util.stream.Collectors;
 @RestController
 @Validated
 public class RsController {
-  @Autowired RsEventRepository rsEventRepository;
-  @Autowired UserRepository userRepository;
-  @Autowired RsService rsService;
+  final RsEventRepository rsEventRepository;
+  final UserRepository userRepository;
+  final RsService rsService;
+
+  public RsController(RsEventRepository rsEventRepository, UserRepository userRepository, RsService rsService) {
+    this.rsEventRepository = rsEventRepository;
+    this.userRepository = userRepository;
+    this.rsService = rsService;
+  }
 
   @GetMapping("/rs/list")
   public ResponseEntity<List<RsEvent>> getRsEventListBetween(
@@ -97,8 +103,11 @@ public class RsController {
 
   @PostMapping("/rs/buy/{id}")
   public ResponseEntity buy(@PathVariable int id, @RequestBody Trade trade){
-    rsService.buy(trade, id);
-    return ResponseEntity.ok().build();
+    boolean isBoughtSuccess = rsService.buy(trade, id);
+    if (isBoughtSuccess) {
+      return ResponseEntity.ok().build();
+    }
+    return ResponseEntity.badRequest().build();
   }
 
 
