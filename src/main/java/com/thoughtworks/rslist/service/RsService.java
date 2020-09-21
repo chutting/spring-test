@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -96,12 +97,26 @@ public class RsService {
   public RsEventDto findRsEventWithLargestAmountByRank(int rank) {
     List<TradeDto> allTrades = tradeRepository.findAllByRank(rank);
     if (allTrades.size() == 0) {
-      throw new RuntimeException();
+      return null;
     }
 
     TradeDto tradeDtoWithLargestAmount = allTrades.stream()
         .collect(Collectors.maxBy(Comparator.comparingInt(TradeDto::getAmount)))
         .get();
     return tradeDtoWithLargestAmount.getRsEventDto();
+  }
+
+  public List<RsEventDto> getRsEventListByRank() {
+    List<RsEventDto> rsEventDtosByRank = rsEventRepository.findAll().stream()
+        .sorted(Comparator.comparing(RsEventDto::getVoteNum))
+        .collect(Collectors.toList());
+
+    for (int i = 1; i < rsEventDtosByRank.size(); i++) {
+      if (findRsEventWithLargestAmountByRank(i) != null) {
+        rsEventDtosByRank.set(i - 1, findRsEventWithLargestAmountByRank(i));
+      }
+    }
+
+    return rsEventDtosByRank;
   }
 }

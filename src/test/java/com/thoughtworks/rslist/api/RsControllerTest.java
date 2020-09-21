@@ -272,4 +272,36 @@ class RsControllerTest {
         .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isBadRequest());
   }
+
+  @Test
+  public void shouldGetRsEsEventSorted() throws Exception {
+    UserDto save = userRepository.save(userDto);
+    RsEventDto rsEventDto = RsEventDto.builder().keyword("无分类").eventName("第一条事件").user(save).voteNum(3).build();
+    RsEventDto rsEventDtoClone = RsEventDto.builder().keyword("无分类").eventName("第二条事件").user(save).voteNum(5).build();
+    RsEventDto rsEventDtoClone2 = RsEventDto.builder().keyword("无分类").eventName("第三条事件").voteNum(2).user(save).build();
+
+    rsEventRepository.save(rsEventDto);
+    rsEventRepository.save(rsEventDtoClone);
+    rsEventRepository.save(rsEventDtoClone2);
+
+    TradeDto tradeDto = TradeDto.builder()
+        .rank(1)
+        .amount(100)
+        .rsEventDto(rsEventDto)
+        .build();
+
+    TradeDto tradeDtoClone2 = TradeDto.builder()
+        .rank(1)
+        .amount(1000)
+        .rsEventDto(rsEventDtoClone2)
+        .build();
+
+    tradeRepository.save(tradeDto);
+    tradeRepository.save(tradeDtoClone2);
+
+    mockMvc.perform(get("/rs/list"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].eventName", is("第三条事件")))
+        .andExpect(jsonPath("$[1].eventName", is("第一条事件")));
+  }
 }

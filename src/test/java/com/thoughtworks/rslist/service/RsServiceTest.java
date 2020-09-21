@@ -273,4 +273,67 @@ class RsServiceTest {
 
     verify(tradeRepository, times(0)).save(tradeDto);
   }
+
+  @Test
+  void shouldGetRsEsEventSorted() {
+    UserDto userDto =
+        UserDto.builder()
+            .voteNum(5)
+            .phone("18888888888")
+            .gender("female")
+            .email("a@b.com")
+            .age(19)
+            .userName("xiaoli")
+            .id(2)
+            .build();
+
+    RsEventDto rsEventDto =
+        RsEventDto.builder()
+            .eventName("event name")
+            .id(1)
+            .keyword("keyword")
+            .voteNum(3)
+            .user(userDto)
+            .build();
+
+    RsEventDto rsEventDtoClone1 =
+        RsEventDto.builder()
+            .eventName("event name clone 1")
+            .id(2)
+            .keyword("keyword")
+            .voteNum(5)
+            .user(userDto)
+            .build();
+
+    RsEventDto rsEventDtoClone2 =
+        RsEventDto.builder()
+            .eventName("event name clone 2")
+            .id(3)
+            .keyword("keyword")
+            .voteNum(2)
+            .user(userDto)
+            .build();
+
+    TradeDto tradeDto = TradeDto.builder()
+        .rank(1)
+        .amount(100)
+        .rsEventDto(rsEventDto)
+        .build();
+
+    TradeDto tradeDtoClone2 = TradeDto.builder()
+        .rank(1)
+        .amount(1000)
+        .rsEventDto(rsEventDtoClone2)
+        .build();
+
+    when(rsEventRepository.findAll()).thenReturn(Arrays.asList(rsEventDto, rsEventDtoClone1, rsEventDtoClone2));
+
+    when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
+    when(tradeRepository.findAllByRank(1)).thenReturn(Arrays.asList(tradeDto, tradeDtoClone2));
+
+    List<RsEventDto> rsEventListByRank = rsService.getRsEventListByRank();
+
+    assertEquals("event name clone 2", rsEventListByRank.get(0).getEventName());
+    assertEquals("event name", rsEventListByRank.get(1).getEventName());
+  }
 }
